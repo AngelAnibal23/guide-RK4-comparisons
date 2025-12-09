@@ -206,25 +206,26 @@ function calcular_Callback(hObject, eventdata, handles)
     end
     
 
-    C = Eddo_RK4(f, x0, y0, xn, n);
-    C2 = Eddo_RK4(f, x0, y0, xn, 2*n);
+    [X1, Y1] = edoRK4(f, x0, y0, xn, n);
+    C  = Y1(end);
+    
+    [~, Y2] = edoRK4(f, x0, y0, xn, 2*n);
+    C2 = Y2(end);
 
     error1 = abs(C2 - C);
 
     set(handles.resultado1, 'String', num2str(C));
-    
     set(handles.comparar, 'Visible', 'on');      
 
     % Asegurar que RK2 y Taylor sigan ocultos hasta presionar comparar:
     set(handles.resultado2, 'Visible', 'off');
-    set(handles.resultado3, 'Visible', 'off');
+    set(handles.resultado3, 'Visible', 'off');  
     set(handles.error2, 'Visible', 'off');
     set(handles.error3, 'Visible', 'off');
-
     set(handles.error1,'String', num2str(error1));
-    [X, Y] = edo_RK_plot(f, x0, y0, xn, n);
+
     axes(handles.axes1);  
-    plot(X, Y, 'b.-', 'LineWidth', 1.5);
+    plot(X1, Y1, 'b.-', 'LineWidth', 1.5);
     grid on;
     xlabel('x');
     ylabel('y(x)');
@@ -274,7 +275,8 @@ function comparar_Callback(hObject, eventdata, handles)
     xn = str2double(get(handles.xn, 'String'));
     n  = str2double(get(handles.n, 'String'));
     
-    C = Eddo_RK4(f, x0, y0, xn, n); 
+    [~, Y1] = edoRK4(f, x0, y0, xn, n);
+    C  = Y1(end);
     RK2 = Eddo_RK2(f, x0, y0, xn, n);             
     T2  = edo_taylor(f, x0, y0, xn, n);     
     E2 = abs(C - RK2);

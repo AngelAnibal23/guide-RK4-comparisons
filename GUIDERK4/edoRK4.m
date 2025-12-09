@@ -1,4 +1,4 @@
-function [X, Y] = edo_RK_plot(f, x0, y0, xn, n)
+function [X, Y] = edoRK4(f, x0, y0, xn, n)
 
 h = (xn - x0)/n;
 
@@ -23,3 +23,4 @@ for i = 1:n
     X(i+1) = xi;
     Y(i+1) = yi;
 end
+
