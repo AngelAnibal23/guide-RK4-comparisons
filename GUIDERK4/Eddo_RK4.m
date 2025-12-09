@@ -1,4 +1,4 @@
-function C = Eddo_RK(f, x0, y0, xn, n)
+function C = Eddo_RK4(f, x0, y0, xn, n)
 
 h = (xn-x0)/n; 
 

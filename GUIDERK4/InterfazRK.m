@@ -1,30 +1,4 @@
 function varargout = InterfazRK(varargin)
-% INTERFAZRK MATLAB code for InterfazRK.fig
-%      INTERFAZRK, by itself, creates a new INTERFAZRK or raises the existing
-%      singleton*.
-%
-%      H = INTERFAZRK returns the handle to a new INTERFAZRK or the handle to
-%      the existing singleton*.
-%
-%      INTERFAZRK('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in INTERFAZRK.M with the given input arguments.
-%
-%      INTERFAZRK('Property','Value',...) creates a new INTERFAZRK or raises the
-%      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before InterfazRK_OpeningFcn gets called.  An
-%      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to InterfazRK_OpeningFcn via varargin.
-%
-%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
-%      instance to run (singleton)".
-%
-% See also: GUIDE, GUIDATA, GUIHANDLES
-
-% Edit the above text to modify the response to help InterfazRK
-
-% Last Modified by GUIDE v2.5 04-Dec-2025 18:07:36
-
-% Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
                    'gui_Singleton',  gui_Singleton, ...
@@ -46,24 +20,17 @@ end
 
 % --- Executes just before InterfazRK is made visible.
 function InterfazRK_OpeningFcn(hObject, eventdata, handles, varargin)
-% This function has no output args, see OutputFcn.
-% hObject    handle to figure
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to InterfazRK (see VARARGIN)
 
-% Choose default command line output for InterfazRK
 handles.output = hObject;
 
-% Update handles structure
 guidata(hObject, handles);
 
-set(handles.comparar, 'Visible', 'off');     % Ocultar botón comparar
+set(handles.comparar, 'Visible', 'off');     
 
-set(handles.resultado2, 'Visible', 'off');   % Ocultar RK2
-set(handles.resultado3, 'Visible', 'off');   % Ocultar Taylor
-set(handles.error2, 'Visible', 'off');       % Ocultar error RK2
-set(handles.error3, 'Visible', 'off');       % Ocultar error Taylor
+set(handles.resultado2, 'Visible', 'off');   
+set(handles.resultado3, 'Visible', 'off');  
+set(handles.error2, 'Visible', 'off');       
+set(handles.error3, 'Visible', 'off');       
 
 set(handles.OrangeKutta, 'Visible', 'off'); 
 set(handles.orangeK, 'Visible', 'off'); 
@@ -73,10 +40,6 @@ set(handles.skyblueE, 'Visible', 'off');
 set(handles.skyblueTay, 'Visible', 'off'); 
     
     
-
-
-% UIWAIT makes InterfazRK wait for user response (see UIRESUME)
-% uiwait(handles.figure1);
 
 
 % --- Outputs from this function are returned to the command line.
@@ -207,25 +170,50 @@ end
 
 % --- Executes on button press in calcular.
 function calcular_Callback(hObject, eventdata, handles)
-% hObject    handle to calcular (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
     f_txt = get(handles.funcion, 'String');
+    if isempty(f_txt)
+        errordlg('Ingrese la función dy/dx = f(x,y).','Dato faltante');
+        uicontrol(handles.funcion);
+        return;
+    end
+
     f = str2func(['@(x,y)' f_txt]);
 
     x0 = str2double(get(handles.x0, 'String'));
+    if isnan(x0)
+        errordlg('x0 debe ser un número real.','Dato inválido');
+        uicontrol(handles.x0);
+        return;
+    end
+    
     y0 = str2double(get(handles.y0, 'String'));
+    if isnan(y0)
+        errordlg('y0 debe ser un número real.','Dato inválido');
+        uicontrol(handles.y0);
+        return;
+    end
     xn = str2double(get(handles.xn, 'String'));
     n = str2double(get(handles.n, 'String'));
+    if n <= 0 || n ~= round(n)
+        errordlg('n debe ser un entero positivo.','Dato inválido');
+        uicontrol(handles.n);
+        return;
+    end
+    if isnan(n)
+        errordlg('n debe ser un número real.','Dato inválido');
+        uicontrol(handles.n);
+        return;
+    end
+    
 
-    C = Eddo_RK(f, x0, y0, xn, n);
-    C2 = Eddo_RK(f, x0, y0, xn, 2*n);
+    C = Eddo_RK4(f, x0, y0, xn, n);
+    C2 = Eddo_RK4(f, x0, y0, xn, 2*n);
 
     error1 = abs(C2 - C);
 
     set(handles.resultado1, 'String', num2str(C));
     
-    set(handles.comparar, 'Visible', 'on');      % Mostrar botón comparar al calcular
+    set(handles.comparar, 'Visible', 'on');      
 
     % Asegurar que RK2 y Taylor sigan ocultos hasta presionar comparar:
     set(handles.resultado2, 'Visible', 'off');
@@ -243,11 +231,7 @@ function calcular_Callback(hObject, eventdata, handles)
     title('Solución usando RK4');
     
     
-% --- Executes on button press in limpiar.
 function limpiar_Callback(hObject, eventdata, handles)
-% hObject    handle to limpiar (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
     set(handles.funcion, 'String', '');
     set(handles.x0, 'String', '');
     set(handles.y0, 'String', '');
@@ -280,11 +264,8 @@ function limpiar_Callback(hObject, eventdata, handles)
     set(handles.skyblueTay, 'Visible', 'off'); 
 
 
-% --- Executes on button press in comparar.
 function comparar_Callback(hObject, eventdata, handles)
-% hObject    handle to comparar (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+
     f_txt = get(handles.funcion, 'String');
     f = str2func(['@(x,y)' f_txt]);
 
@@ -293,7 +274,7 @@ function comparar_Callback(hObject, eventdata, handles)
     xn = str2double(get(handles.xn, 'String'));
     n  = str2double(get(handles.n, 'String'));
     
-    C = Eddo_RK(f, x0, y0, xn, n); 
+    C = Eddo_RK4(f, x0, y0, xn, n); 
     RK2 = Eddo_RK2(f, x0, y0, xn, n);             
     T2  = edo_taylor(f, x0, y0, xn, n);     
     E2 = abs(C - RK2);
